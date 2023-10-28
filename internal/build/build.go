@@ -1,49 +1,45 @@
 package build
 
 import (
+	"banners_rotator/internal/banner"
 	"banners_rotator/internal/config"
+	"banners_rotator/internal/demogroup"
+	"banners_rotator/internal/slot"
+	"banners_rotator/internal/stat"
 	"context"
 
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type App struct {
-	Mongo *Mongo
+type BannerService interface {
+	Get(ctx context.Context, id banner.ID) (*banner.Banner, error)
+	Create(ctx context.Context, id banner.ID, desc string) error
 }
 
-type Mongo struct {
-	BannerColl    *mongo.Collection
-	SlotColl      *mongo.Collection
-	DemoGroupColl *mongo.Collection
-	StatsColl     *mongo.Collection
+type DemoGroupService interface {
+	Get(ctx context.Context, id demogroup.ID) (*demogroup.Group, error)
+	Create(ctx context.Context, id demogroup.ID, desc string) error
 }
 
-func Build(ctx context.Context, conf config.Config) (*App, error) {
-	mng, err := buildMongo(ctx, conf)
-	if err != nil {
-		return nil, err
-	}
-
-	return &App{Mongo: mng}, nil
+type SlotService interface {
+	Get(ctx context.Context, id slot.ID) (*slot.Slot, error)
+	Create(ctx context.Context, id slot.ID, desc string) error
 }
 
-func buildMongo(ctx context.Context, conf config.Config) (*Mongo, error) {
-	mongoClient, err := mongo.Connect(ctx, options.Client().ApplyURI(config.MongoURI(conf)))
-	if err != nil {
-		return nil, err
-	}
+type StatService interface {
+	GetStat(ctx context.Context, slotID, bannerID, groupID string) (*stat.Stat, error)
+	AddShow(ctx context.Context, slotID, bannerID, groupID string) error
+	AddClick(ctx context.Context, slotID, bannerID, groupID string) error
+}
 
-	db := mongoClient.Database(conf.MongoDB)
-	bannerColl := db.Collection(conf.MongoBannerColl)
-	slotColl := db.Collection(conf.MongoSlotColl)
-	groupColl := db.Collection(conf.MongoDemoGroupColl)
-	statsColl := db.Collection(conf.MongoStatsColl)
+type Builder struct {
+	conf config.Config
 
-	return &Mongo{
-		BannerColl:    bannerColl,
-		SlotColl:      slotColl,
-		DemoGroupColl: groupColl,
-		StatsColl:     statsColl,
-	}, nil
+	mongoClient *mongo.Client
+	mongoDB     mongo.Database
+	collections map[string]mongo.Collection
+}
+
+func New(ctx context.Context, conf config.Config) *Builder {
+	return nil
 }
