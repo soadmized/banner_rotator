@@ -1,45 +1,117 @@
 package build
 
 import (
+	"banners_rotator/internal/api"
 	"banners_rotator/internal/banner"
 	"banners_rotator/internal/config"
 	"banners_rotator/internal/demogroup"
 	"banners_rotator/internal/slot"
 	"banners_rotator/internal/stat"
 	"context"
+	"github.com/gin-gonic/gin"
 
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
-
-type BannerService interface {
-	Get(ctx context.Context, id banner.ID) (*banner.Banner, error)
-	Create(ctx context.Context, id banner.ID, desc string) error
-}
-
-type DemoGroupService interface {
-	Get(ctx context.Context, id demogroup.ID) (*demogroup.Group, error)
-	Create(ctx context.Context, id demogroup.ID, desc string) error
-}
-
-type SlotService interface {
-	Get(ctx context.Context, id slot.ID) (*slot.Slot, error)
-	Create(ctx context.Context, id slot.ID, desc string) error
-}
-
-type StatService interface {
-	GetStat(ctx context.Context, slotID, bannerID, groupID string) (*stat.Stat, error)
-	AddShow(ctx context.Context, slotID, bannerID, groupID string) error
-	AddClick(ctx context.Context, slotID, bannerID, groupID string) error
-}
 
 type Builder struct {
 	conf config.Config
 
-	mongoClient *mongo.Client
-	mongoDB     mongo.Database
-	collections map[string]mongo.Collection
+	mongoDB *mongo.Database
 }
 
-func New(ctx context.Context, conf config.Config) *Builder {
-	return nil
+func New(ctx context.Context, conf config.Config) (*Builder, error) {
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(config.MongoURI(conf)))
+	if err != nil {
+		return nil, err
+	}
+
+	db := client.Database(conf.MongoDBName)
+
+	builder := Builder{
+		conf:    conf,
+		mongoDB: db,
+	}
+
+	return &builder, nil
+}
+
+func (b *Builder) Api() *api.Api {
+	router := gin.New()
+	bannerSrv := b.bannerService()
+	groupSrv := b.demoGroupService()
+	slotSrv := b.slotService()
+	statSrv := b.statService()
+
+	api2 := api.Api{
+		Router:    router,
+		BannerSrv: &bannerSrv,
+		SlotSrv:   &slotSrv,
+		GroupSrv:  &groupSrv,
+		StatSrv:   &statSrv,
+	}
+
+	api2.RegisterHandlers()
+	
+	return &api2
+}
+
+func (b *Builder) bannerService() banner.Service {
+	repo := b.bannerRepo()
+	srv := banner.Service{Repo: &repo}
+
+	return srv
+}
+
+func (b *Builder) bannerRepo() banner.Repo {
+	coll := b.mongoDB.Collection(b.conf.MongoBannerColl)
+
+	repo := banner.Repo{Collection: coll}
+
+	return repo
+}
+
+func (b *Builder) demoGroupService() demogroup.Service {
+	repo := b.demoGroupRepo()
+	srv := demogroup.Service{Repo: &repo}
+
+	return srv
+}
+
+func (b *Builder) demoGroupRepo() demogroup.Repo {
+	coll := b.mongoDB.Collection(b.conf.MongoDemoGroupColl)
+
+	repo := demogroup.Repo{Collection: coll}
+
+	return repo
+}
+
+func (b *Builder) slotService() slot.Service {
+	repo := b.slotRepo()
+	srv := slot.Service{Repo: &repo}
+
+	return srv
+}
+
+func (b *Builder) slotRepo() slot.Repo {
+	coll := b.mongoDB.Collection(b.conf.MongoSlotColl)
+
+	repo := slot.Repo{Collection: coll}
+
+	return repo
+}
+
+func (b *Builder) statService() stat.Service {
+	repo := b.statRepo()
+	srv := stat.Service{Repo: &repo}
+
+	return srv
+}
+
+func (b *Builder) statRepo() stat.Repo {
+	coll := b.mongoDB.Collection(b.conf.MongoStatColl)
+
+	repo := stat.Repo{Collection: coll}
+
+	return repo
 }

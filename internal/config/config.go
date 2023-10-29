@@ -13,11 +13,11 @@ type Config struct {
 	AppPort int32 `envconfig:"APP_PORT"`
 
 	MongoHost          string `envconfig:"MONGO_HOST"`
-	MongoDB            string `envconfig:"MONGO_DB"`
+	MongoDBName        string `envconfig:"MONGO_DB"`
 	MongoBannerColl    string `envconfig:"MONGO_BANNER_COLL"`
 	MongoSlotColl      string `envconfig:"MONGO_SLOT_COLL"`
 	MongoDemoGroupColl string `envconfig:"MONGO_DEMOGROUP_COLL"`
-	MongoStatsColl     string `envconfig:"MONGO_STATS_COLL"`
+	MongoStatColl      string `envconfig:"MONGO_STAT_COLL"`
 }
 
 func Load() Config {

@@ -74,3 +74,29 @@ func (r *Repo) AddShow(ctx context.Context, slotID, bannerID, groupID string) er
 
 	return nil
 }
+
+func (r *Repo) AddBanner(ctx context.Context, slotID, bannerID string) error {
+	filter := bson.M{"_id": slotID}
+	path := fmt.Sprintf("banner_stat.%s", bannerID)
+	set := bson.M{"$set": path}
+
+	_, err := r.Collection.UpdateOne(ctx, filter, set, options.Update().SetUpsert(true))
+	if err != nil {
+		return errors.Wrap(err, "add banner")
+	}
+
+	return nil
+}
+
+func (r *Repo) RemoveBanner(ctx context.Context, slotID, bannerID string) error {
+	filter := bson.M{"_id": slotID}
+	path := fmt.Sprintf("banner_stat.%s", bannerID)
+	set := bson.M{"$unset": path}
+
+	_, err := r.Collection.UpdateOne(ctx, filter, set, options.Update().SetUpsert(true))
+	if err != nil {
+		return errors.Wrap(err, "remove banner")
+	}
+
+	return nil
+}
