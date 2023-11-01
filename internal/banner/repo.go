@@ -9,7 +9,7 @@ import (
 )
 
 type Repo struct {
-	repo *mongo.Collection
+	Collection *mongo.Collection
 }
 
 type bannerDoc struct {
@@ -27,7 +27,7 @@ func docToBanner(d bannerDoc) *Banner {
 func (r *Repo) Get(ctx context.Context, id ID) (*Banner, error) {
 	var banner bannerDoc
 
-	err := r.repo.FindOne(ctx, bson.M{"_id": id}).Decode(&banner)
+	err := r.Collection.FindOne(ctx, bson.M{"_id": id}).Decode(&banner)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, errors.New("banner not found")
@@ -45,7 +45,7 @@ func (r *Repo) Create(ctx context.Context, id ID, desc string) error {
 	//	return errors.New("banner already exists, use another id")
 	//}
 
-	_, err := r.repo.InsertOne(ctx, bson.M{"_id": id, "description": desc})
+	_, err := r.Collection.InsertOne(ctx, bson.M{"_id": id, "description": desc})
 	if err != nil {
 		return errors.Wrap(err, "create banner")
 	}

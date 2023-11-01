@@ -9,7 +9,7 @@ import (
 )
 
 type Repo struct {
-	repo *mongo.Collection
+	Collection *mongo.Collection
 }
 
 type groupDoc struct {
@@ -27,7 +27,7 @@ func docToGroup(d groupDoc) *Group {
 func (r *Repo) Get(ctx context.Context, id ID) (*Group, error) {
 	var group groupDoc
 
-	err := r.repo.FindOne(ctx, bson.M{"_id": id}).Decode(&group)
+	err := r.Collection.FindOne(ctx, bson.M{"_id": id}).Decode(&group)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, errors.New("demo group not found")
@@ -40,7 +40,7 @@ func (r *Repo) Get(ctx context.Context, id ID) (*Group, error) {
 }
 
 func (r *Repo) Create(ctx context.Context, id ID, desc string) error {
-	_, err := r.repo.InsertOne(ctx, bson.M{"_id": id, "description": desc})
+	_, err := r.Collection.InsertOne(ctx, bson.M{"_id": id, "description": desc})
 	if err != nil {
 		return errors.Wrap(err, "create demo group")
 	}

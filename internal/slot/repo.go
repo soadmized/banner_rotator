@@ -9,7 +9,7 @@ import (
 )
 
 type Repo struct {
-	repo *mongo.Collection
+	Collection *mongo.Collection
 }
 
 type slotDoc struct {
@@ -27,7 +27,7 @@ func docToSlot(d slotDoc) *Slot {
 func (r *Repo) Get(ctx context.Context, id ID) (*Slot, error) {
 	var slot slotDoc
 
-	err := r.repo.FindOne(ctx, bson.M{"_id": id}).Decode(&slot)
+	err := r.Collection.FindOne(ctx, bson.M{"_id": id}).Decode(&slot)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, errors.New("slot not found")
@@ -40,7 +40,7 @@ func (r *Repo) Get(ctx context.Context, id ID) (*Slot, error) {
 }
 
 func (r *Repo) Create(ctx context.Context, id ID, desc string) error {
-	_, err := r.repo.InsertOne(ctx, bson.M{"_id": id, "description": desc})
+	_, err := r.Collection.InsertOne(ctx, bson.M{"_id": id, "description": desc})
 	if err != nil {
 		return errors.Wrap(err, "create slot")
 	}

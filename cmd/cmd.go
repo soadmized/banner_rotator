@@ -4,15 +4,21 @@ import (
 	"banners_rotator/internal/build"
 	"banners_rotator/internal/config"
 	"context"
-	"go.mongodb.org/mongo-driver/bson"
+	"fmt"
+	"github.com/pkg/errors"
+	"log"
 )
 
 func Run(ctx context.Context, conf config.Config) error {
-	app, err := build.Build(ctx, conf)
+	builder, err := build.New(ctx, conf)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "build app")
 	}
 
-	app.Mongo.BannerColl.InsertOne(ctx, bson.M{"_id": "banner1", "desc": "first banner"})
+	api := builder.Api()
+	addr := fmt.Sprintf("localhost:%d", conf.AppPort)
+
+	log.Fatal(api.Router.Run(addr))
+
 	return nil
 }

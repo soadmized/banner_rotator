@@ -13,6 +13,6 @@ func main() {
 
 	err := cmd.Run(ctx, conf)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 }
