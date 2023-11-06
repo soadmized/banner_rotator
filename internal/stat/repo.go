@@ -1,6 +1,7 @@
 package stat
 
 import (
+	"banners_rotator/internal/banner"
 	"context"
 	"fmt"
 	"github.com/pkg/errors"
@@ -43,10 +44,47 @@ func (r *Repo) GetStat(ctx context.Context, slotID, bannerID, groupID string) (*
 		return nil, err
 	}
 
-	stat := slotDoc.BannerStat[bannerID][groupID]
+	groupStat, ok := slotDoc.BannerStat[bannerID]
+	if !ok {
+		statModel := docToStat(statDoc{
+			Clicks: 0,
+			Shows:  0,
+		})
+
+		return &statModel, err
+	}
+
+	stat, ok := groupStat[groupID]
+	if !ok {
+		statModel := docToStat(statDoc{
+			Clicks: 0,
+			Shows:  0,
+		})
+
+		return &statModel, err
+	}
+
 	statModel := docToStat(stat)
 
 	return &statModel, nil
+}
+
+func (r *Repo) GetBannerIDs(ctx context.Context, slotID string) ([]banner.ID, error) {
+	var slotDoc slotStatDoc
+
+	err := r.Collection.FindOne(ctx, bson.M{"_id": slotID}).Decode(&slotDoc)
+	if err != nil {
+		return nil, err
+	}
+
+	bannerIDs := make([]banner.ID, 0, len(slotDoc.BannerStat))
+
+	for k := range slotDoc.BannerStat {
+		id := banner.ID(k)
+		bannerIDs = append(bannerIDs, id)
+	}
+
+	return bannerIDs, nil
 }
 
 func (r *Repo) AddClick(ctx context.Context, slotID, bannerID, groupID string) error {

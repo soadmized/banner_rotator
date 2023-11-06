@@ -1,6 +1,12 @@
 package stat
 
-import "context"
+import (
+	"banners_rotator/internal/bandit"
+	"banners_rotator/internal/banner"
+	"context"
+
+	"github.com/pkg/errors"
+)
 
 type Repository interface {
 	GetStat(ctx context.Context, slotID, bannerID, groupID string) (*Stat, error)
@@ -8,13 +14,14 @@ type Repository interface {
 	AddClick(ctx context.Context, slotID, bannerID, groupID string) error
 	AddBanner(ctx context.Context, slotID, bannerID string) error
 	RemoveBanner(ctx context.Context, slotID, bannerID string) error
+	GetBannerIDs(ctx context.Context, slotID string) ([]banner.ID, error)
 }
 
 type Service struct {
 	Repo Repository
 }
 
-func (s *Service) GetStat(ctx context.Context, slotID, bannerID, groupID string) (*Stat, error) {
+func (s *Service) getStat(ctx context.Context, slotID, bannerID, groupID string) (*Stat, error) {
 	stat, err := s.Repo.GetStat(ctx, slotID, bannerID, groupID)
 	if err != nil {
 		return nil, err
@@ -57,4 +64,48 @@ func (s *Service) RemoveBanner(ctx context.Context, slotID, bannerID string) err
 	}
 
 	return nil
+}
+
+func (s *Service) bannerClicksByGroupID(ctx context.Context, slotID, groupID string) (map[banner.ID]int, error) {
+	banners, err := s.Repo.GetBannerIDs(ctx, slotID)
+	if err != nil {
+		return nil, err
+	}
+
+	bannerStat := make(map[banner.ID]int, len(banners))
+
+	for _, v := range banners {
+		stat, err := s.getStat(ctx, slotID, string(v), groupID)
+		if err != nil {
+			return nil, errors.Wrap(err, "get banner stat by group id")
+		}
+
+		bannerStat[v] = stat.Clicks
+	}
+
+	return bannerStat, nil
+}
+
+// PickBanner implements multi armed bandit algorithm
+func (s *Service) PickBanner(ctx context.Context, slotID, groupID string) (banner.ID, error) {
+	bannerStat, err := s.bannerClicksByGroupID(ctx, slotID, groupID)
+	if err != nil {
+		return "", err
+	}
+
+	banners, err := s.Repo.GetBannerIDs(ctx, slotID)
+	if err != nil {
+		return "", err
+	}
+
+	b := bandit.New(bannerStat, banners)
+
+	bannerID := b.Pick()
+
+	err = s.AddShow(ctx, slotID, string(bannerID), groupID)
+	if err != nil {
+		return "", errors.Wrap(err, "add click after picking banner")
+	}
+
+	return bannerID, nil
 }

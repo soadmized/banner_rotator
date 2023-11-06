@@ -4,7 +4,6 @@ import (
 	"banners_rotator/internal/banner"
 	"banners_rotator/internal/demogroup"
 	"banners_rotator/internal/slot"
-	"banners_rotator/internal/stat"
 	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
@@ -29,11 +28,10 @@ type SlotService interface {
 }
 
 type StatService interface {
-	GetStat(ctx context.Context, slotID, bannerID, groupID string) (*stat.Stat, error)
-	AddShow(ctx context.Context, slotID, bannerID, groupID string) error
 	AddClick(ctx context.Context, slotID, bannerID, groupID string) error
 	AddBanner(ctx context.Context, slotID, bannerID string) error
 	RemoveBanner(ctx context.Context, slotID, bannerID string) error
+	PickBanner(ctx context.Context, slotID, groupID string) (banner.ID, error)
 }
 
 const (
@@ -112,20 +110,24 @@ func (a *Api) AddClick(ctx *gin.Context) {
 	ctx.Writer.WriteHeader(http.StatusOK)
 }
 
-// TODO
 func (a *Api) PickBanner(ctx *gin.Context) {
-	_, err := decodeBody(ctx.Request.Body)
+	body, err := decodeBody(ctx.Request.Body)
 	if err != nil {
 		ctx.Writer.WriteHeader(http.StatusInternalServerError)
 
 		return
 	}
 
-	// multi armed bandit method here
+	bannerID, err := a.StatSrv.PickBanner(ctx, body.SlotID, body.GroupID)
+	if err != nil {
+		ctx.Writer.WriteHeader(http.StatusInternalServerError)
 
-	ctx.JSON(http.StatusOK, struct {
-		id string
-	}{id: "banner42"})
+		return
+	}
+
+	resp := response{ID: bannerID}
+
+	ctx.JSON(http.StatusOK, resp)
 }
 
 func decodeBody(body io.ReadCloser) (reqBody, error) {
@@ -145,4 +147,8 @@ func (a *Api) RegisterHandlers() {
 	a.Router.POST(addClickPath, a.AddClick)
 	a.Router.POST(removeBannerPath, a.RemoveBanner)
 	a.Router.POST(pickBannerPath, a.PickBanner)
+}
+
+type response struct {
+	ID banner.ID `json:"id"`
 }

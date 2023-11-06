@@ -39,3 +39,5 @@ type Stat struct {
 	Clicks int
 	Shows  int
 }
+
+type BannerStatByGroupID map[banner.ID]Stat
