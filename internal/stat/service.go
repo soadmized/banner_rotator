@@ -1,13 +1,14 @@
 package stat
 
 import (
-	"banners_rotator/internal/bandit"
-	"banners_rotator/internal/banner"
 	"context"
 
 	"github.com/pkg/errors"
+	"github.com/soadmized/banners_rotator/internal/bandit"
+	"github.com/soadmized/banners_rotator/internal/banner"
 )
 
+//go:generate  mockery --tags="mock" --filename repo.go --name Repository
 type Repository interface {
 	GetStat(ctx context.Context, slotID, bannerID, groupID string) (*Stat, error)
 	AddShow(ctx context.Context, slotID, bannerID, groupID string) error

@@ -40,11 +40,6 @@ func (r *Repo) Get(ctx context.Context, id ID) (*Banner, error) {
 }
 
 func (r *Repo) Create(ctx context.Context, id ID, desc string) error {
-	//banner, _ := r.Get(ctx, id)
-	//if banner != nil {
-	//	return errors.New("banner already exists, use another id")
-	//}
-
 	_, err := r.Collection.InsertOne(ctx, bson.M{"_id": id, "description": desc})
 	if err != nil {
 		return errors.Wrap(err, "create banner")

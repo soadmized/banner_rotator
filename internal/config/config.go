@@ -10,9 +10,9 @@ import (
 )
 
 type Config struct {
-	AppPort int32 `envconfig:"APP_PORT"`
+	AppPort int32 `envconfig:"APP_PORT" default:"8080"`
 
-	MongoHost          string `envconfig:"MONGO_HOST"`
+	MongoHost          string `envconfig:"MONGO_HOST" default:"localhost"`
 	MongoDBName        string `envconfig:"MONGO_DB"`
 	MongoBannerColl    string `envconfig:"MONGO_BANNER_COLL"`
 	MongoSlotColl      string `envconfig:"MONGO_SLOT_COLL"`

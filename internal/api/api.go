@@ -1,13 +1,13 @@
 package api
 
 import (
-	"banners_rotator/internal/banner"
-	"banners_rotator/internal/demogroup"
-	"banners_rotator/internal/slot"
 	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
+	"github.com/soadmized/banners_rotator/internal/banner"
+	"github.com/soadmized/banners_rotator/internal/demogroup"
+	"github.com/soadmized/banners_rotator/internal/slot"
 	"io"
 	"net/http"
 )

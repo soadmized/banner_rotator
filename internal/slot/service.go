@@ -2,7 +2,7 @@ package slot
 
 import "context"
 
-// TODO: mockery
+//go:generate  mockery --tags="mock" --filename repo.go --name Repository
 type Repository interface {
 	Get(ctx context.Context, id ID) (*Slot, error)
 	Create(ctx context.Context, id ID, desc string) error

@@ -1,14 +1,14 @@
 package stat
 
 import (
-	"banners_rotator/internal/banner"
 	"context"
 	"fmt"
-	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/mongo/options"
 
+	"github.com/pkg/errors"
+	"github.com/soadmized/banners_rotator/internal/banner"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Repo struct {

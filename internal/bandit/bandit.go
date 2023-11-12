@@ -1,7 +1,7 @@
 package bandit
 
 import (
-	"banners_rotator/internal/banner"
+	"github.com/soadmized/banners_rotator/internal/banner"
 	"math/rand"
 )
 
