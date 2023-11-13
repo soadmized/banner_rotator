@@ -116,7 +116,7 @@ func (r *Repo) AddShow(ctx context.Context, slotID, bannerID, groupID string) er
 func (r *Repo) AddBanner(ctx context.Context, slotID, bannerID string) error {
 	filter := bson.M{"_id": slotID}
 	path := fmt.Sprintf("banner_stat.%s", bannerID)
-	set := bson.M{"$set": path}
+	set := bson.M{"$set": bson.M{path: bson.M{}}}
 
 	_, err := r.Collection.UpdateOne(ctx, filter, set, options.Update().SetUpsert(true))
 	if err != nil {
@@ -129,7 +129,7 @@ func (r *Repo) AddBanner(ctx context.Context, slotID, bannerID string) error {
 func (r *Repo) RemoveBanner(ctx context.Context, slotID, bannerID string) error {
 	filter := bson.M{"_id": slotID}
 	path := fmt.Sprintf("banner_stat.%s", bannerID)
-	set := bson.M{"$unset": path}
+	set := bson.M{"$unset": bson.M{path: bson.M{}}}
 
 	_, err := r.Collection.UpdateOne(ctx, filter, set, options.Update().SetUpsert(true))
 	if err != nil {
