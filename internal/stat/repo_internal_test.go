@@ -1,4 +1,4 @@
-package slot
+package stat
 
 import (
 	"testing"
@@ -6,27 +6,27 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_docToSlot(t *testing.T) {
+func Test_docToStat(t *testing.T) {
 	tests := []struct {
 		name string
-		d    slotDoc
-		want *Slot
+		d    statDoc
+		want Stat
 	}{
 		{
 			name: "positive",
-			d: slotDoc{
-				ID:          "slot1",
-				Description: "slot 1",
+			d: statDoc{
+				Clicks: 2,
+				Shows:  2,
 			},
-			want: &Slot{
-				ID:          "slot1",
-				Description: "slot 1",
+			want: Stat{
+				Clicks: 2,
+				Shows:  2,
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := docToSlot(tt.d)
+			got := docToStat(tt.d)
 			assert.Equal(t, tt.want, got)
 		})
 	}

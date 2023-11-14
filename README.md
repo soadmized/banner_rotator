@@ -10,33 +10,33 @@
 Body:
 ```
 {
-   "slot_id": string,
-   "banner_id": string
+   "slotId": string,
+   "bannerId": string
 }
 ```
 2. `/add_banner` - добавляет указанный баннер в ротацию в указанном слоте.  
 Body:
 ```
 {
-   "slot_id": string,
-   "banner_id": string
+   "slotId": string,
+   "bannerId": string
 }
 ```
 3. `/add_click` - добавляет один клик для указанных слота, баннера и демогруппы.  
 Body:
 ```
 {
-   "slot_id": string,
-   "banner_id": string,
-   "group_id": string
+   "slotId": string,
+   "bannerId": string,
+   "groupId": string
 }
 ```
 4. `/pick_banner` - выбирает баннера для показа указанной демогруппе в указанном слоте. Используется алгоритм epsilon-greedy.  
 Body:
 ```
 {
-   "slot_id": string,
-   "group_id": string
+   "slotId": string,
+   "groupId": string
 }
 ```
 

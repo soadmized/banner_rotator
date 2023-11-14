@@ -3,10 +3,10 @@ package banner_test
 import (
 	"context"
 	"fmt"
-	"github.com/soadmized/banners_rotator/internal/banner"
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/soadmized/banners_rotator/internal/banner"
 	"github.com/soadmized/banners_rotator/internal/config"
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/bson"
@@ -35,7 +35,7 @@ func (s *RepoTestSuite) SetupSuite() {
 	coll := db.Collection("banner-test")
 	s.coll = coll
 
-	//fixture
+	// fixture
 	_, err = s.coll.InsertOne(ctx, bson.M{"_id": "banner42", "description": "desc banner 42"})
 	s.Require().NoError(err)
 }
@@ -74,7 +74,6 @@ func (s *RepoTestSuite) TestCreate() {
 	got, err := repo.Get(ctx, "banner1")
 	s.Require().NoError(err)
 	s.Require().Equal(banner.Banner{ID: "banner1", Description: "desc banner 1"}, *got)
-
 }
 
 func (s *RepoTestSuite) TestCreateExist() {

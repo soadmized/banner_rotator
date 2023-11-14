@@ -16,7 +16,7 @@ func Run(ctx context.Context, conf config.Config) error {
 		return errors.Wrap(err, "build app")
 	}
 
-	api := builder.Api()
+	api := builder.API()
 	addr := fmt.Sprintf("localhost:%d", conf.AppPort)
 
 	log.Fatal(api.Router.Run(addr))

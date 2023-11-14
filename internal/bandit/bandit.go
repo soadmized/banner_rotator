@@ -1,27 +1,28 @@
 package bandit
 
 import (
-	"github.com/soadmized/banners_rotator/internal/banner"
 	"math/rand"
+
+	"github.com/soadmized/banners_rotator/internal/banner"
 )
 
 const epsilon = 0.3
 
 type Bandit struct {
-	rewards map[banner.ID]int //armID: rewards
+	rewards map[banner.ID]int // armID: rewards
 	arms    []banner.ID
 }
 
 func (b *Bandit) Pick() banner.ID {
-	probability := rand.Float64()
+	probability := rand.Float64() //nolint:gosec
 
 	if probability <= (1 - epsilon) {
 		// exploit
 		return b.armWithMaxReward()
-	} else {
-		// explore
-		return b.randomArm()
 	}
+
+	// explore
+	return b.randomArm()
 }
 
 func (b *Bandit) armWithMaxReward() banner.ID {
@@ -40,7 +41,7 @@ func (b *Bandit) armWithMaxReward() banner.ID {
 }
 
 func (b *Bandit) randomArm() banner.ID {
-	armID := rand.Intn(len(b.arms))
+	armID := rand.Intn(len(b.arms)) //nolint:gosec
 
 	return b.arms[armID]
 }

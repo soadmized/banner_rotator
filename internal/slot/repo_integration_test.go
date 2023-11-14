@@ -35,7 +35,7 @@ func (s *RepoTestSuite) SetupSuite() {
 	coll := db.Collection("slot-test")
 	s.coll = coll
 
-	//fixture
+	// fixture
 	_, err = s.coll.InsertOne(ctx, bson.M{"_id": "slot66", "description": "desc slot 66"})
 	s.Require().NoError(err)
 }
@@ -74,7 +74,6 @@ func (s *RepoTestSuite) TestCreate() {
 	got, err := repo.Get(ctx, "slot1")
 	s.Require().NoError(err)
 	s.Require().Equal(slot.Slot{ID: "slot1", Description: "desc slot 1"}, *got)
-
 }
 
 func (s *RepoTestSuite) TestCreateExist() {

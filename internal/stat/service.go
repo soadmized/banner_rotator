@@ -87,7 +87,7 @@ func (s *Service) bannerClicksByGroupID(ctx context.Context, slotID, groupID str
 	return bannerStat, nil
 }
 
-// PickBanner implements multi armed bandit algorithm
+// PickBanner implements multi armed bandit algorithm.
 func (s *Service) PickBanner(ctx context.Context, slotID, groupID string) (banner.ID, error) {
 	bannerStat, err := s.bannerClicksByGroupID(ctx, slotID, groupID)
 	if err != nil {

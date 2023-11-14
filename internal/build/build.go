@@ -2,6 +2,7 @@ package build
 
 import (
 	"context"
+
 	"github.com/gin-gonic/gin"
 	"github.com/soadmized/banners_rotator/internal/api"
 	"github.com/soadmized/banners_rotator/internal/banner"
@@ -9,7 +10,6 @@ import (
 	"github.com/soadmized/banners_rotator/internal/demogroup"
 	"github.com/soadmized/banners_rotator/internal/slot"
 	"github.com/soadmized/banners_rotator/internal/stat"
-
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -36,14 +36,14 @@ func New(ctx context.Context, conf config.Config) (*Builder, error) {
 	return &builder, nil
 }
 
-func (b *Builder) Api() *api.Api {
+func (b *Builder) API() *api.API {
 	router := gin.New()
 	bannerSrv := b.bannerService()
 	groupSrv := b.demoGroupService()
 	slotSrv := b.slotService()
 	statSrv := b.statService()
 
-	api2 := api.Api{
+	api2 := api.API{
 		Router:    router,
 		BannerSrv: &bannerSrv,
 		SlotSrv:   &slotSrv,

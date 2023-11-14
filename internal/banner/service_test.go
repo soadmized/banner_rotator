@@ -26,7 +26,6 @@ func TestService_Get(t *testing.T) {
 	got, err := srv.Get(ctx, bannerID)
 	require.NoError(t, err)
 	require.Equal(t, &want, got)
-
 }
 
 func TestService_GetError(t *testing.T) {

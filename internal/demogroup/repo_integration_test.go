@@ -35,7 +35,7 @@ func (s *RepoTestSuite) SetupSuite() {
 	coll := db.Collection("demogroup-test")
 	s.coll = coll
 
-	//fixture
+	// fixture
 	_, err = s.coll.InsertOne(ctx, bson.M{"_id": "group13", "description": "desc group 13"})
 	s.Require().NoError(err)
 }
@@ -74,7 +74,6 @@ func (s *RepoTestSuite) TestCreate() {
 	got, err := repo.Get(ctx, "group1")
 	s.Require().NoError(err)
 	s.Require().Equal(demogroup.Group{ID: "group1", Description: "desc group 1"}, *got)
-
 }
 
 func (s *RepoTestSuite) TestCreateExist() {

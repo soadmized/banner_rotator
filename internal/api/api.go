@@ -3,13 +3,15 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"io"
+	"log"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"github.com/soadmized/banners_rotator/internal/banner"
 	"github.com/soadmized/banners_rotator/internal/demogroup"
 	"github.com/soadmized/banners_rotator/internal/slot"
-	"io"
-	"net/http"
 )
 
 type BannerService interface {
@@ -41,7 +43,7 @@ const (
 	pickBannerPath   = "pick_banner"
 )
 
-type Api struct {
+type API struct {
 	Router *gin.Engine
 
 	BannerSrv BannerService
@@ -51,15 +53,16 @@ type Api struct {
 }
 
 type reqBody struct {
-	BannerID string `json:"banner_id,omitempty"`
-	SlotID   string `json:"slot_id,omitempty"`
-	GroupID  string `json:"group_id,omitempty"`
+	BannerID string `json:"bannerId,omitempty"`
+	SlotID   string `json:"slotId,omitempty"`
+	GroupID  string `json:"groupId,omitempty"`
 }
 
-func (a *Api) RemoveBanner(ctx *gin.Context) {
+func (a *API) RemoveBanner(ctx *gin.Context) {
 	body, err := decodeBody(ctx.Request.Body)
 	if err != nil {
 		ctx.Writer.WriteHeader(http.StatusInternalServerError)
+		log.Print(err)
 
 		return
 	}
@@ -67,6 +70,7 @@ func (a *Api) RemoveBanner(ctx *gin.Context) {
 	err = a.StatSrv.RemoveBanner(ctx, body.SlotID, body.BannerID)
 	if err != nil {
 		ctx.Writer.WriteHeader(http.StatusInternalServerError)
+		log.Print(err)
 
 		return
 	}
@@ -74,10 +78,11 @@ func (a *Api) RemoveBanner(ctx *gin.Context) {
 	ctx.Writer.WriteHeader(http.StatusOK)
 }
 
-func (a *Api) AddBanner(ctx *gin.Context) {
+func (a *API) AddBanner(ctx *gin.Context) {
 	body, err := decodeBody(ctx.Request.Body)
 	if err != nil {
 		ctx.Writer.WriteHeader(http.StatusInternalServerError)
+		log.Print(err)
 
 		return
 	}
@@ -85,6 +90,7 @@ func (a *Api) AddBanner(ctx *gin.Context) {
 	err = a.StatSrv.AddBanner(ctx, body.SlotID, body.BannerID)
 	if err != nil {
 		ctx.Writer.WriteHeader(http.StatusInternalServerError)
+		log.Print(err)
 
 		return
 	}
@@ -92,10 +98,11 @@ func (a *Api) AddBanner(ctx *gin.Context) {
 	ctx.Writer.WriteHeader(http.StatusOK)
 }
 
-func (a *Api) AddClick(ctx *gin.Context) {
+func (a *API) AddClick(ctx *gin.Context) {
 	body, err := decodeBody(ctx.Request.Body)
 	if err != nil {
 		ctx.Writer.WriteHeader(http.StatusInternalServerError)
+		log.Print(err)
 
 		return
 	}
@@ -103,6 +110,7 @@ func (a *Api) AddClick(ctx *gin.Context) {
 	err = a.StatSrv.AddClick(ctx, body.SlotID, body.BannerID, body.GroupID)
 	if err != nil {
 		ctx.Writer.WriteHeader(http.StatusInternalServerError)
+		log.Print(err)
 
 		return
 	}
@@ -110,10 +118,11 @@ func (a *Api) AddClick(ctx *gin.Context) {
 	ctx.Writer.WriteHeader(http.StatusOK)
 }
 
-func (a *Api) PickBanner(ctx *gin.Context) {
+func (a *API) PickBanner(ctx *gin.Context) {
 	body, err := decodeBody(ctx.Request.Body)
 	if err != nil {
 		ctx.Writer.WriteHeader(http.StatusInternalServerError)
+		log.Print(err)
 
 		return
 	}
@@ -121,6 +130,7 @@ func (a *Api) PickBanner(ctx *gin.Context) {
 	bannerID, err := a.StatSrv.PickBanner(ctx, body.SlotID, body.GroupID)
 	if err != nil {
 		ctx.Writer.WriteHeader(http.StatusInternalServerError)
+		log.Print(err)
 
 		return
 	}
@@ -142,7 +152,7 @@ func decodeBody(body io.ReadCloser) (reqBody, error) {
 	return res, nil
 }
 
-func (a *Api) RegisterHandlers() {
+func (a *API) RegisterHandlers() {
 	a.Router.POST(addBannerPath, a.AddBanner)
 	a.Router.POST(addClickPath, a.AddClick)
 	a.Router.POST(removeBannerPath, a.RemoveBanner)

@@ -2,11 +2,11 @@ package demogroup_test
 
 import (
 	"context"
+	"testing"
+
 	"github.com/pkg/errors"
 	"github.com/soadmized/banners_rotator/internal/demogroup"
 	"github.com/soadmized/banners_rotator/internal/demogroup/mocks"
-	"testing"
-
 	"github.com/stretchr/testify/require"
 )
 
@@ -26,7 +26,6 @@ func TestService_Get(t *testing.T) {
 	got, err := srv.Get(ctx, id)
 	require.NoError(t, err)
 	require.Equal(t, &want, got)
-
 }
 
 func TestService_GetError(t *testing.T) {
