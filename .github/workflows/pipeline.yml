@@ -9,10 +9,10 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go
-        uses: hashicorp/setup-golang@v1
-#        with:
-#          version-file: go.mod
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+          cache: false
 
       - name: Check out code
         uses: actions/checkout@v3
