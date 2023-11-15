@@ -1,9 +1,9 @@
 package stat
 
 import (
-	"banners_rotator/internal/banner"
-	"banners_rotator/internal/demogroup"
-	"banners_rotator/internal/slot"
+	"github.com/soadmized/banners_rotator/internal/banner"
+	"github.com/soadmized/banners_rotator/internal/demogroup"
+	"github.com/soadmized/banners_rotator/internal/slot"
 )
 
 // SlotID
@@ -39,3 +39,5 @@ type Stat struct {
 	Clicks int
 	Shows  int
 }
+
+type BannerStatByGroupID map[banner.ID]Stat

@@ -1,10 +1,11 @@
 package main
 
 import (
-	"banners_rotator/cmd"
-	"banners_rotator/internal/config"
 	"context"
 	"log"
+
+	"github.com/soadmized/banners_rotator/cmd"
+	"github.com/soadmized/banners_rotator/internal/config"
 )
 
 func main() {

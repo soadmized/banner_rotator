@@ -3,11 +3,12 @@ package stat
 import (
 	"context"
 	"fmt"
-	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/mongo/options"
 
+	"github.com/pkg/errors"
+	"github.com/soadmized/banners_rotator/internal/banner"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Repo struct {
@@ -29,10 +30,7 @@ type statDoc struct {
 }
 
 func docToStat(d statDoc) Stat {
-	return Stat{
-		Clicks: d.Clicks,
-		Shows:  d.Shows,
-	}
+	return Stat(d)
 }
 
 func (r *Repo) GetStat(ctx context.Context, slotID, bannerID, groupID string) (*Stat, error) {
@@ -40,13 +38,59 @@ func (r *Repo) GetStat(ctx context.Context, slotID, bannerID, groupID string) (*
 
 	err := r.Collection.FindOne(ctx, bson.M{"_id": slotID}).Decode(&slotDoc)
 	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			statModel := docToStat(statDoc{
+				Clicks: 0,
+				Shows:  0,
+			})
+
+			return &statModel, nil
+		}
+
 		return nil, err
 	}
 
-	stat := slotDoc.BannerStat[bannerID][groupID]
+	groupStat, ok := slotDoc.BannerStat[bannerID]
+	if !ok {
+		statModel := docToStat(statDoc{
+			Clicks: 0,
+			Shows:  0,
+		})
+
+		return &statModel, nil
+	}
+
+	stat, ok := groupStat[groupID]
+	if !ok {
+		statModel := docToStat(statDoc{
+			Clicks: 0,
+			Shows:  0,
+		})
+
+		return &statModel, nil
+	}
+
 	statModel := docToStat(stat)
 
 	return &statModel, nil
+}
+
+func (r *Repo) GetBannerIDs(ctx context.Context, slotID string) ([]banner.ID, error) {
+	var slotDoc slotStatDoc
+
+	err := r.Collection.FindOne(ctx, bson.M{"_id": slotID}).Decode(&slotDoc)
+	if err != nil {
+		return nil, err
+	}
+
+	bannerIDs := make([]banner.ID, 0, len(slotDoc.BannerStat))
+
+	for k := range slotDoc.BannerStat {
+		id := banner.ID(k)
+		bannerIDs = append(bannerIDs, id)
+	}
+
+	return bannerIDs, nil
 }
 
 func (r *Repo) AddClick(ctx context.Context, slotID, bannerID, groupID string) error {
@@ -76,11 +120,25 @@ func (r *Repo) AddShow(ctx context.Context, slotID, bannerID, groupID string) er
 }
 
 func (r *Repo) AddBanner(ctx context.Context, slotID, bannerID string) error {
+	var slotDoc slotStatDoc
+
+	err := r.Collection.FindOne(ctx, bson.M{"_id": slotID}).Decode(&slotDoc)
+	if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
+		return errors.Wrap(err, "find banner")
+	}
+
+	_, ok := slotDoc.BannerStat[bannerID]
+	if ok {
+		msg := fmt.Sprintf("banner %s exist in %s slot", bannerID, slotID)
+
+		return errors.New(msg)
+	}
+
 	filter := bson.M{"_id": slotID}
 	path := fmt.Sprintf("banner_stat.%s", bannerID)
-	set := bson.M{"$set": path}
+	set := bson.M{"$set": bson.M{path: bson.M{}}}
 
-	_, err := r.Collection.UpdateOne(ctx, filter, set, options.Update().SetUpsert(true))
+	_, err = r.Collection.UpdateOne(ctx, filter, set, options.Update().SetUpsert(true))
 	if err != nil {
 		return errors.Wrap(err, "add banner")
 	}
@@ -91,7 +149,7 @@ func (r *Repo) AddBanner(ctx context.Context, slotID, bannerID string) error {
 func (r *Repo) RemoveBanner(ctx context.Context, slotID, bannerID string) error {
 	filter := bson.M{"_id": slotID}
 	path := fmt.Sprintf("banner_stat.%s", bannerID)
-	set := bson.M{"$unset": path}
+	set := bson.M{"$unset": bson.M{path: bson.M{}}}
 
 	_, err := r.Collection.UpdateOne(ctx, filter, set, options.Update().SetUpsert(true))
 	if err != nil {
