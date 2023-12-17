@@ -1,0 +1,28 @@
+services:
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    volumes:
+      - mongodb:/data/db
+    ports:
+      - 27017:27017
+    expose:
+      - 27017
+  app:
+    container_name: app
+    env_file:
+      - .env
+    environment:
+      - MONGO_HOST=mongodb:27017
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - mongodb
+    ports:
+      - 8080:8080
+    expose:
+      - 8080
+
+volumes:
+  mongodb:
